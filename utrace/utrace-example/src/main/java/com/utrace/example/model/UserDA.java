@@ -1,11 +1,9 @@
 package com.utrace.example.model;
 
-
 import com.urvega.framework.dbconn.ManagerIF;
 import com.urvega.framework.util.LogUtil;
 import com.utrace.example.config.ConfigInfo;
 import com.utrace.example.utils.MD5;
-import com.utrace.example.utils.RandomNumber;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -13,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.util.Date;
 import org.apache.logging.log4j.Logger;
 
 // User Data Acces
@@ -46,15 +45,14 @@ public class UserDA {
         ManagerIF cm = null;
         Connection con = null;
         try {
-            con = DriverManager.getConnection(ConfigInfo.DB_URL
-                    , ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+            con = DriverManager.getConnection(ConfigInfo.DB_URL,
+                    ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
             try ( PreparedStatement stmt = con.prepareStatement("SELECT * FROM user WHERE `id`= ?")) {
                 stmt.setInt(1, id);
                 rs = stmt.executeQuery();
-                while ( rs.next() )
-                {
-                   userEntity = getFromResultSet( rs);
-                   break;
+                while (rs.next()) {
+                    userEntity = getFromResultSet(rs);
+                    break;
                 }
                 rs.close();
                 stmt.close();
@@ -68,22 +66,21 @@ public class UserDA {
         }
         return userEntity;
     }
-    
+
     public static UserEnt getByEmail(String email) {
         UserEnt userEntity = null;
         ResultSet rs = null;
         ManagerIF cm = null;
         Connection con = null;
         try {
-            con = DriverManager.getConnection(ConfigInfo.DB_URL
-                    , ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+            con = DriverManager.getConnection(ConfigInfo.DB_URL,
+                    ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
             try ( PreparedStatement stmt = con.prepareStatement("SELECT * FROM user WHERE `email`= ?")) {
                 stmt.setString(1, email);
                 rs = stmt.executeQuery();
-                while ( rs.next() )
-                {
-                   userEntity = getFromResultSet( rs);
-                   break;
+                while (rs.next()) {
+                    userEntity = getFromResultSet(rs);
+                    break;
                 }
                 rs.close();
                 stmt.close();
@@ -97,14 +94,14 @@ public class UserDA {
         }
         return userEntity;
     }
-    
+
     public static boolean insert(UserEnt item) {
         boolean result = false;
         ManagerIF cm = null;
         Connection con = null;
         try {
-            con = DriverManager.getConnection(ConfigInfo.DB_URL
-                    , ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+            con = DriverManager.getConnection(ConfigInfo.DB_URL,
+                    ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
 
             try ( PreparedStatement stmt = con.prepareStatement(QUERY_INSERT, Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, item.email);
@@ -112,7 +109,7 @@ public class UserDA {
                 stmt.setString(3, item.fullname);
                 stmt.setString(4, item.phone);
                 stmt.setBoolean(5, item.status);
-                stmt.setTimestamp(6,item.createdAt);
+                stmt.setTimestamp(6, item.createdAt);
                 stmt.setTimestamp(7, item.updatedAt);
 
                 result = stmt.executeUpdate() > 0;
@@ -138,14 +135,14 @@ public class UserDA {
         ManagerIF cm = null;
         Connection con = null;
         try {
-           con = DriverManager.getConnection(ConfigInfo.DB_URL
-                    , ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+            con = DriverManager.getConnection(ConfigInfo.DB_URL,
+                    ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
             try ( PreparedStatement stmt = con.prepareStatement(QUERY_UPDATE)) {
                 stmt.setBoolean(1, item.emailVerified);
                 stmt.setString(2, item.fullname);
                 stmt.setString(3, item.phone);
                 stmt.setBoolean(6, item.status);
-                stmt.setTimestamp(7,item.updatedAt);
+                stmt.setTimestamp(7, item.updatedAt);
                 stmt.setInt(8, item.id);
                 result = stmt.executeUpdate() > 0;
             }
@@ -165,16 +162,15 @@ public class UserDA {
         ManagerIF cm = null;
         Connection con = null;
         try {
-            con = DriverManager.getConnection(ConfigInfo.DB_URL
-                    , ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+            con = DriverManager.getConnection(ConfigInfo.DB_URL,
+                    ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
             try ( PreparedStatement stmt = con.prepareStatement("SELECT * FROM user WHERE `email`= ? AND `password` = ? AND `email_verified` = 1")) {
                 stmt.setString(1, email);
                 stmt.setString(2, md5);
                 rs = stmt.executeQuery();
-                while ( rs.next() )
-                {
-                   userEntity = getFromResultSet( rs);
-                   break;
+                while (rs.next()) {
+                    userEntity = getFromResultSet(rs);
+                    break;
                 }
                 rs.close();
                 stmt.close();
@@ -195,15 +191,14 @@ public class UserDA {
         ManagerIF cm = null;
         Connection con = null;
         try {
-            con = DriverManager.getConnection(ConfigInfo.DB_URL
-                    , ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+            con = DriverManager.getConnection(ConfigInfo.DB_URL,
+                    ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
             try ( PreparedStatement stmt = con.prepareStatement("SELECT * FROM user WHERE `email`= ? AND email_verified = 1")) {
                 stmt.setString(1, email);
                 rs = stmt.executeQuery();
-                while ( rs.next() )
-                {
-                   userEntity = getFromResultSet( rs);
-                   break;
+                while (rs.next()) {
+                    userEntity = getFromResultSet(rs);
+                    break;
                 }
                 rs.close();
                 stmt.close();
@@ -223,12 +218,33 @@ public class UserDA {
         ManagerIF cm = null;
         Connection con = null;
         try {
-           con = DriverManager.getConnection(ConfigInfo.DB_URL
-                    , ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+            con = DriverManager.getConnection(ConfigInfo.DB_URL,
+                    ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
             try ( PreparedStatement stmt = con.prepareStatement("UPDATE `user` SET `otp` = ? WHERE `email` = ?")) {
                 stmt.setString(1, randomOtp);
                 stmt.setString(2, email);
                 result = stmt.executeUpdate() > 0;
+            }
+        } catch (Exception e) {
+            logger.error(LogUtil.stackTrace(e));
+        } finally {
+            if (cm != null && con != null) {
+                cm.returnClient(con);
+            }
+        }
+    }
+
+    public static void updateVerifyStatus(String email) {
+        ManagerIF cm = null;
+        Connection con = null;
+        try {
+            con = DriverManager.getConnection(ConfigInfo.DB_URL, ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+            try ( PreparedStatement stmt = con.prepareStatement("UPDATE `user` SET `status` = ?, `email_verified` = ?, `updated_at` = ? WHERE `email` = ?")) {
+                stmt.setBoolean(1, true);  // Cập nhật trạng thái thành true
+                stmt.setBoolean(2, true);  // Cập nhật trạng thái xác minh email thành true
+                stmt.setTimestamp(3, new Timestamp(new Date().getTime()));  // Cập nhật thời gian hiện tại
+                stmt.setString(4, email);  // Điều kiện WHERE là email
+                stmt.executeUpdate();
             }
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
@@ -245,16 +261,15 @@ public class UserDA {
         ManagerIF cm = null;
         Connection con = null;
         try {
-            con = DriverManager.getConnection(ConfigInfo.DB_URL
-                    , ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
-            try ( PreparedStatement stmt = con.prepareStatement("SELECT * FROM user WHERE `email`= ? AND `opt` = ?")) {
+            con = DriverManager.getConnection(ConfigInfo.DB_URL,
+                    ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+            try ( PreparedStatement stmt = con.prepareStatement("SELECT * FROM user WHERE `email`= ? AND `otp` = ?")) {
                 stmt.setString(1, email);
                 stmt.setString(2, otp);
                 rs = stmt.executeQuery();
-                while ( rs.next() )
-                {
-                   userEntity = getFromResultSet( rs);
-                   break;
+                while (rs.next()) {
+                    userEntity = getFromResultSet(rs);
+                    break;
                 }
                 rs.close();
                 stmt.close();
@@ -266,7 +281,7 @@ public class UserDA {
                 cm.returnClient(con);
             }
         }
-        return userEntity != null;
+        return (userEntity != null);
     }
 
     static UserEnt register(String email) {
@@ -274,13 +289,12 @@ public class UserDA {
         ManagerIF cm = null;
         Connection con = null;
         try {
-            con = DriverManager.getConnection(ConfigInfo.DB_URL
-                    , ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
-            //String randomPass = RandomNumber.getRandomNumberString();
+            con = DriverManager.getConnection(ConfigInfo.DB_URL,
+                    ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
             try ( PreparedStatement stmt = con.prepareStatement("INSERT INTO `user`(`email`, `email_verified`) VALUES(?, ?)", Statement.RETURN_GENERATED_KEYS)) {
                 stmt.setString(1, email);
                 stmt.setInt(2, 0);
-                
+
                 result = stmt.executeUpdate() > 0;
                 if (result) {
                     try ( ResultSet rs = stmt.getGeneratedKeys()) {
@@ -297,22 +311,20 @@ public class UserDA {
                 cm.returnClient(con);
             }
         }
-        
+
         return null;
     }
 
     public static UserEnt setNewPassword(String email, String pass) {
-        boolean result = false;
         ManagerIF cm = null;
         Connection con = null;
         try {
-           con = DriverManager.getConnection(ConfigInfo.DB_URL
-                    , ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+            con = DriverManager.getConnection(ConfigInfo.DB_URL, ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
             try ( PreparedStatement stmt = con.prepareStatement("UPDATE `user` SET `password` = ? WHERE `email` = ?")) {
                 stmt.setString(1, MD5.md5(pass));
                 stmt.setString(2, email);
-                result = stmt.executeUpdate() > 0;
-                if (result != false) {
+                int rowsAffected = stmt.executeUpdate();
+                if (rowsAffected > 0) {
                     return getByEmail(email);
                 }
             }
@@ -325,4 +337,5 @@ public class UserDA {
         }
         return null;
     }
+
 }

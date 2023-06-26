@@ -1,6 +1,7 @@
 package com.utrace.example.model;
 import com.urvega.framework.util.ConvertUtil;
 import com.urvega.framework.util.LogUtil;
+import static com.utrace.example.model.UserDA.updateVerifyStatus;
 import com.utrace.example.utils.RandomNumber;
 import com.utrace.example.utils.SendMail;
 import java.io.UnsupportedEncodingException;
@@ -193,6 +194,7 @@ public class UserBC {
         UserDA userDA = new UserDA();
         Boolean verifySuccess = userDA.verifyOtp(email, otp);
         if (verifySuccess == true) {
+            updateVerifyStatus(email);
             return getByEmail(email);
         }
         return null;
@@ -220,12 +222,15 @@ public class UserBC {
 
     public static UserEnt setNewPassword(String email, String pass, String repass) {
         UserEnt userEnt = UserDA.getByEmail(email);
-        
+        if (userEnt.status && userEnt.emailVerified != true)
+            return null;
+            
         if (userEnt == null)
             return null;
         
-        if (pass != repass)
+        if (!pass.equals(repass)) {
             return null;
+        }
         
         userEnt = UserDA.setNewPassword(email, pass);
         return userEnt;
