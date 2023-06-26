@@ -18,12 +18,13 @@ public class ServiceDaemon {
         staticFiles.expireTime(600L);
         //enableDebugScreen();
         
+        // API User
         get("/users/:email", UserController::getByEmail);
         post("users/login", UserController::login);
         post("users/forgotPass", UserController::forgotPass);
         post("/users/checkOtp", UserController::checkOtp);
         post("/users/register", UserController::register);
         post("/users/setNewPass", UserController::setNewPass);
-        
+        post("/users/changePass", UserController::changePassword);
     }    
 }

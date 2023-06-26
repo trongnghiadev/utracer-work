@@ -156,34 +156,26 @@ public class UserDA {
         return result;
     }
 
-    static UserEnt login(String email, String md5) {
-        UserEnt userEntity = null;
-        ResultSet rs = null;
-        ManagerIF cm = null;
-        Connection con = null;
-        try {
-        con = DriverManager.getConnection(ConfigInfo.DB_URL,
-                    ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
-            try ( PreparedStatement stmt = con.prepareStatement("SELECT * FROM user WHERE `email`= ? AND `password` = ? AND `email_verified` = 1")) {
-                stmt.setString(1, email);
-                stmt.setString(2, md5);
-                rs = stmt.executeQuery();
-                while (rs.next()) {
-                    userEntity = getFromResultSet(rs);
-                    break;
-                }
-                rs.close();
-                stmt.close();
-            }
-        } catch (Exception e) {
-            logger.error(LogUtil.stackTrace(e));
-        } finally {
-            if (cm != null && con != null) {
-                cm.returnClient(con);
+    public static UserEnt login(String email, String md5) {
+    UserEnt userEntity = null;
+
+    try (Connection con = DriverManager.getConnection(ConfigInfo.DB_URL, ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
+         PreparedStatement stmt = con.prepareStatement("SELECT * FROM user WHERE `email` = ? AND `password` = ? AND `email_verified` = 1 AND `status` = 1")) {
+
+        stmt.setString(1, email);
+        stmt.setString(2, md5);
+
+        try (ResultSet rs = stmt.executeQuery()) {
+            if (rs.next()) {
+                userEntity = getFromResultSet(rs);
             }
         }
-        return userEntity;
+    } catch (Exception e) {
+        logger.error(LogUtil.stackTrace(e));
     }
+
+    return userEntity;
+}
 
     public static UserEnt forgotPass(String email) {
         UserEnt userEntity = null;

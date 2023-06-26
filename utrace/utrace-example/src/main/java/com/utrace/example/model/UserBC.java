@@ -2,6 +2,7 @@ package com.utrace.example.model;
 import com.urvega.framework.util.ConvertUtil;
 import com.urvega.framework.util.LogUtil;
 import static com.utrace.example.model.UserDA.updateVerifyStatus;
+import com.utrace.example.utils.MD5;
 import com.utrace.example.utils.RandomNumber;
 import com.utrace.example.utils.SendMail;
 import java.io.UnsupportedEncodingException;
@@ -143,28 +144,20 @@ public class UserBC {
         return result;
     }
 
-    public static UserEnt login(String email, String md5) {
-        long startTime = System.currentTimeMillis();
-        
-        UserEnt result = null;
-        
-        try {
-            if(ConvertUtil.toString(email).length() <= 0) {
-                return result;
-            }
-            
-            if(ConvertUtil.toString(md5).length() <= 0) {
-                return result;
-            }
-            
-            result = UserDA.login(email, md5);
-            
-        } catch (Exception e) {
-            logger.error(LogUtil.stackTrace(e));
-        } finally {
-        }
-        return result;
+   public static UserEnt login(String email, String md5) {
+    if (email.isEmpty() || md5.isEmpty()) {
+        return null;
     }
+
+    try {
+        return UserDA.login(email, md5);
+    } catch (Exception e) {
+        logger.error(LogUtil.stackTrace(e));
+    }
+
+    return null;
+}
+
     
     public static UserEnt forgotPass(String email) {
         long startTime = System.currentTimeMillis();
@@ -240,7 +233,7 @@ public class UserBC {
         String randomOtp = RandomNumber.getRandomNumberString();
         UserDA userDA = new UserDA();
         userDA.updateVerifyOtp(email, randomOtp);
-        String msgContent = randomOtp + " là mã xác nhận đăng ký tài khoản";
+        String msgContent = randomOtp + " là mã xác nhận tài khoản";
         try {
         SendMail.Send(email, "Mã xác nhận", msgContent);
         } catch (MessagingException e) {
@@ -249,6 +242,29 @@ public class UserBC {
             e.printStackTrace();
         }
     }
+    
+    
+    public static boolean changePassword(String email, String oldPassword, String newPassword) {
+        // Kiểm tra tính hợp lệ của email, mật khẩu cũ và mật khẩu mới
+        if (email == null || email.isEmpty() || oldPassword == null || oldPassword.isEmpty() || newPassword == null || newPassword.isEmpty()) {
+            return false;
+        }
 
-   
+        // Kiểm tra xem người dùng có tồn tại và mật khẩu cũ chính xác hay không
+        UserEnt userEntity = UserDA.login(email, MD5.md5(oldPassword));
+        if (userEntity == null) {
+            return false;
+        }
+        
+        // Thực hiện cập nhật mật khẩu mới
+        UserEnt updatedUser = UserDA.setNewPassword(email, newPassword);
+        if (updatedUser == null) {
+            return false;
+        }
+
+        // Trả về true nếu cập nhật mật khẩu thành công
+        return true;
+    }
+
+
 }

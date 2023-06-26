@@ -58,7 +58,6 @@ public class UserController {
         UserBC userBC = new UserBC();
         String email = req.queryParams("email");
         UserEnt userEnt = UserBC.register(email);
-        ObjectMapper mapper = new ObjectMapper();
         return JSONUtil.serialize(userEnt);
     }
     
@@ -70,4 +69,17 @@ public class UserController {
         UserEnt userEnt = UserBC.setNewPassword(email, pass, repass);
         return JSONUtil.serialize(userEnt);
     }
+    
+    public static boolean changePassword(Request req, Response res) throws JsonProcessingException {
+    String email = req.queryParams("email");
+    String oldPassword = req.queryParams("oldPassword");
+    String newPassword = req.queryParams("newPassword");
+    
+    boolean passwordChanged = UserBC.changePassword(email, oldPassword, newPassword);
+    
+    return passwordChanged;
+}
+
+    
+    
 }
