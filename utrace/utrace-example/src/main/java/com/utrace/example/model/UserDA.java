@@ -162,7 +162,7 @@ public class UserDA {
         ManagerIF cm = null;
         Connection con = null;
         try {
-            con = DriverManager.getConnection(ConfigInfo.DB_URL,
+        con = DriverManager.getConnection(ConfigInfo.DB_URL,
                     ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);
             try ( PreparedStatement stmt = con.prepareStatement("SELECT * FROM user WHERE `email`= ? AND `password` = ? AND `email_verified` = 1")) {
                 stmt.setString(1, email);
@@ -243,7 +243,7 @@ public class UserDA {
                 stmt.setBoolean(1, true);  // Cập nhật trạng thái thành true
                 stmt.setBoolean(2, true);  // Cập nhật trạng thái xác minh email thành true
                 stmt.setTimestamp(3, new Timestamp(new Date().getTime()));  // Cập nhật thời gian hiện tại
-                stmt.setString(4, email);  // Điều kiện WHERE là email
+                stmt.setString(4, email);
                 stmt.executeUpdate();
             }
         } catch (Exception e) {

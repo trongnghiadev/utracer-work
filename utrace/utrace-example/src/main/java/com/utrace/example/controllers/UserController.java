@@ -59,7 +59,7 @@ public class UserController {
         String email = req.queryParams("email");
         UserEnt userEnt = UserBC.register(email);
         ObjectMapper mapper = new ObjectMapper();
-        return mapper.writeValueAsString(userEnt);
+        return JSONUtil.serialize(userEnt);
     }
     
     public static String setNewPass(Request req, Response res) {
