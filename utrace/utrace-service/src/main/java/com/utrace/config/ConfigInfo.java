@@ -1,5 +1,4 @@
-package com.utrace.API.config;
-
+package com.utrace.config;
 import com.urvega.framework.util.Config;
 import com.urvega.framework.util.ConvertUtil;
 

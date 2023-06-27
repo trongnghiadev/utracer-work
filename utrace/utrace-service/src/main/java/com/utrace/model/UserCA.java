@@ -1,10 +1,9 @@
-package com.utrace.API.model;
-
+package com.utrace.model;
 import com.urvega.framework.redis.RedisClient;
 import com.urvega.framework.util.ConvertUtil;
 import com.urvega.framework.util.JSONUtil;
 import com.urvega.framework.util.LogUtil;
-import com.utrace.API.config.ConfigInfo;
+import com.utrace.config.ConfigInfo;
 import org.apache.logging.log4j.Logger;
 
 // User Cache

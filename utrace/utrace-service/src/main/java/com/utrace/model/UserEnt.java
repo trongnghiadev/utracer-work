@@ -1,4 +1,4 @@
-package com.utrace.API.model;
+package com.utrace.model;
 
 import java.sql.Timestamp;
 

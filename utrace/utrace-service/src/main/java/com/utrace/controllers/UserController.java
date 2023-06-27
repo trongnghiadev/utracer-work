@@ -2,13 +2,13 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
-package com.utrace.API.controllers;
+package com.utrace.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.utrace.API.model.UserBC;
-import com.utrace.API.model.UserEnt;
+import com.utrace.model.UserBC;
+import com.utrace.model.UserEnt;
 import spark.Request;
 import spark.Response;
-import com.utrace.API.utils.MD5;
+import com.utrace.utils.MD5;
 import com.urvega.framework.util.JSONUtil;
 
 /**

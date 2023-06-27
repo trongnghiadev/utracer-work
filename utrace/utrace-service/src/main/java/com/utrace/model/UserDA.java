@@ -1,9 +1,8 @@
-package com.utrace.API.model;
-
+package com.utrace.model;
 import com.urvega.framework.dbconn.ManagerIF;
 import com.urvega.framework.util.LogUtil;
-import com.utrace.API.config.ConfigInfo;
-import com.utrace.API.utils.MD5;
+import com.utrace.utils.MD5;
+import com.utrace.config.ConfigInfo;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -276,7 +275,7 @@ public class UserDA {
         return (userEntity != null);
     }
 
-    static UserEnt register(String email) {
+    public static UserEnt register(String email) {
         boolean result = false;
         ManagerIF cm = null;
         Connection con = null;

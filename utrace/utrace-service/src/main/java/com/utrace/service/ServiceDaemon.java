@@ -1,6 +1,5 @@
-package com.utrace.API.service;
-
-import com.utrace.API.controllers.UserController;
+package com.utrace.service;
+import com.utrace.controllers.UserController;
 import com.urvega.framework.util.LogUtil;
 import org.apache.logging.log4j.Logger;
 import static spark.Spark.*;

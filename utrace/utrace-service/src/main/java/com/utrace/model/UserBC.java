@@ -1,10 +1,10 @@
-package com.utrace.API.model;
+package com.utrace.model;
 import com.urvega.framework.util.ConvertUtil;
 import com.urvega.framework.util.LogUtil;
-import static com.utrace.API.model.UserDA.updateVerifyStatus;
-import com.utrace.API.utils.MD5;
-import com.utrace.API.utils.RandomNumber;
-import com.utrace.API.utils.SendMail;
+import static com.utrace.model.UserDA.updateVerifyStatus;
+import com.utrace.utils.MD5;
+import com.utrace.utils.RandomNumber;
+import com.utrace.utils.SendMail;
 import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.Date;
