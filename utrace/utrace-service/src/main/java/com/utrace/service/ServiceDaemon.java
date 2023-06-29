@@ -18,12 +18,16 @@ public class ServiceDaemon {
         //enableDebugScreen();
         
         // API User
-        get("/users/:email", UserController::getByEmail);
-        post("users/login", UserController::login);
-        post("users/forgotPass", UserController::forgotPass);
-        post("/users/checkOtp", UserController::checkOtp);
-        post("/users/register", UserController::register);
-        post("/users/setNewPass", UserController::setNewPass);
-        post("/users/changePass", UserController::changePassword);
+        path("/users", () -> {
+            get("/:email", UserController::getByEmail);
+            post("/login", UserController::login);
+            post("/forgotPass", UserController::forgotPass);
+            post("/checkOtp", UserController::checkOtp);
+            post("/register", UserController::register);
+            post("/setNewPass", UserController::setNewPass);
+            post("/changePass", UserController::changePassword);
+            post("/changeOtp", UserController::changeOTP);
+        });
+        
     }    
 }

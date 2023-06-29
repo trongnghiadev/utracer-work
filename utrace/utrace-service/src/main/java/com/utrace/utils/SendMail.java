@@ -13,7 +13,7 @@ import java.util.Properties;
 
 /**
  *
- * @author nitro5
+ * @author Admin
  */
 public class SendMail {
     public static Boolean Send(String toEmail, String subject, String body) throws MessagingException, UnsupportedEncodingException {
