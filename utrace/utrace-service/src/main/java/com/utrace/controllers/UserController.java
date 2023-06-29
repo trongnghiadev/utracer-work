@@ -5,12 +5,16 @@
 package com.utrace.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.urvega.framework.crypto.Rijndael;
+import com.urvega.framework.util.JSONUtil;
+import com.utrace.model.LoginRespData;
 import com.utrace.model.UserBC;
 import com.utrace.model.UserEnt;
 import spark.Request;
 import spark.Response;
 import com.utrace.utils.MD5;
 import com.utrace.utils.APIResponseUtil;
+import com.utrace.utils.TokenHelper;
 
 /**
  *
@@ -25,7 +29,6 @@ public class UserController {
     public static String getByEmail(Request req, Response res) throws JsonProcessingException {
         String email = req.params("email");
         UserEnt userEnt = UserBC.getByEmail(email);
-
         if (userEnt != null) {
             return APIResponseUtil.successResponse(userEnt);
         } else {
@@ -38,7 +41,18 @@ public class UserController {
         String password = req.queryParams("password");
         UserEnt userEnt = UserBC.login(email, MD5.md5(password));
         if (userEnt != null) {
-            return APIResponseUtil.successResponse(userEnt);
+            // Serialize User Info 
+            String info = JSONUtil.serialize(userEnt);
+            // Create token base on UserInfo
+            String token = TokenHelper.CreateToken(info);
+            // Create login response data
+            LoginRespData respData = new LoginRespData();
+            respData.token = token;
+            respData.user = userEnt;
+            // Return login success
+            // Client will get the token and set in Authorization header
+            // on every request
+            return APIResponseUtil.successResponse(respData);
         } else {
             return APIResponseUtil.errorResponse("Login found");
         }
