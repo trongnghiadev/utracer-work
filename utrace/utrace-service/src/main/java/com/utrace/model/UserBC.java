@@ -330,8 +330,7 @@ public class UserBC {
             if (user == null) {
                 return result;
             }
-            
-            if(user.passwordUser != null) {
+            if(user.passwordUser.length() > 0) {
                 return result;
             }
             if (!(user.status && user.emailVerified)) {

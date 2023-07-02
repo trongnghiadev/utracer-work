@@ -5,7 +5,6 @@
 package com.utrace.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.urvega.framework.crypto.Rijndael;
 import com.urvega.framework.util.JSONUtil;
 import com.utrace.model.LoginRespData;
 import com.utrace.model.UserBC;
@@ -14,7 +13,10 @@ import spark.Request;
 import spark.Response;
 import com.utrace.utils.MD5;
 import com.utrace.utils.APIResponseUtil;
+import com.utrace.utils.SendMail;
 import com.utrace.utils.TokenHelper;
+import java.io.UnsupportedEncodingException;
+import javax.mail.MessagingException;
 
 /**
  *

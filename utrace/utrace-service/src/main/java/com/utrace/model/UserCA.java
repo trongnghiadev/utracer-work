@@ -1,4 +1,5 @@
 package com.utrace.model;
+
 import com.urvega.framework.redis.RedisClient;
 import com.urvega.framework.util.ConvertUtil;
 import com.urvega.framework.util.JSONUtil;
@@ -8,6 +9,7 @@ import com.utrace.utils.SendMail;
 import java.io.UnsupportedEncodingException;
 import javax.mail.MessagingException;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 
 // User Cache
 /**
@@ -15,15 +17,16 @@ import org.apache.logging.log4j.Logger;
  * @author superman
  */
 public class UserCA {
+
     private static final Logger logger = LogUtil.getLogger(UserCA.class);
-    
+
     private static final String USER_KEY = "usr:%d";
     private static final String USER_OTP = "otp:%s";
     private static final String USER_MAP = "usm:%s";
-    
+
     public static boolean set(UserEnt item) {
         boolean result = false;
-        
+
         try {
             RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
             String key = String.format(USER_KEY, item.id);
@@ -31,131 +34,112 @@ public class UserCA {
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
         }
-        
+
         return result;
     }
-    
-      public static boolean setOTP(String email, String OTP) {
+
+    public static boolean setOTP(String email, String OTP) {
         boolean result = false;
         try {
             RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
             String key = String.format(USER_OTP, email);
-            OtpData otpdata = new OtpData();
-            otpdata.OTP = OTP;
-            otpdata.created = System.currentTimeMillis();
-            otpdata.expiration = System.currentTimeMillis() + 3600;
-            otpdata.status = true;
-            otpdata.countSend = 1;
-            result = client.set(key,JSONUtil.serialize(otpdata));
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("otp", OTP);
+            jsonObject.put("countSend", 1);
+            result = client.set(key, JSONUtil.serialize(jsonObject));
             client.expireAt(key, System.currentTimeMillis() + 3600000);
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
         }
-     
         return result;
     }
-      
-      
- public static boolean UpdateOTP(String email, String OTP) {
-    boolean result = false;
-    try {  
-        RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
-        String key = String.format(USER_OTP, email);
-        String data = client.get(key);
-        
-        if (data == null) {
-            // Không tìm thấy dữ liệu OTP, không thể cập nhật
-            return result;
-        }
-        
-        OtpData item = JSONUtil.deserialize(data, OtpData.class);
-        
-       
-        
-        long currentTime = System.currentTimeMillis();
-        if (currentTime >= item.expiration) {
-            // Đã qua 1 giờ, đặt lại countSend về 1
-            item.countSend = 1;
-        } else {
-            // Chưa qua 1 giờ, tăng countSend lên 1
-            item.countSend++;
-        }
-        
-        if (item.countSend >= 4) {
-            // Điều kiện không thỏa mãn, không thể cập nhật
-            return result;
-        }
-                
-        item.status = true;
-        item.created = currentTime;
-        item.expiration = currentTime + 100000000; // 1 giờ
-        item.OTP = OTP;
-        result = client.set(key, JSONUtil.serialize(item));
-        
-        String msgContent = OTP + " là mã xác nhận tài khoản";
-        try {
-            SendMail.Send(email, "Mã xác nhận", msgContent);
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
-    } catch (Exception e) {
-        logger.error(LogUtil.stackTrace(e));
-    }
- 
-    return result;
-}
 
-      
-    
-    
-    public static UserEnt get(int id){
+    public static boolean UpdateOTP(String email, String OTP) {
+        boolean result = false;
+        try {
+            RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
+            String key = String.format(USER_OTP, email);
+            String data = client.get(key);
+
+            if (data == null) {
+                return UserCA.setOTP(email, OTP);
+            }
+            JSONObject jsonObject = new JSONObject(data);
+            JSONObject mapObject = jsonObject.getJSONObject("map");
+            int countSend = mapObject.getInt("countSend");
+
+            if (countSend >= 4) {
+                // Điều kiện không thỏa mãn, không thể cập nhật
+                return result;
+            }
+            result = client.del(key) > 0;
+            mapObject.put("countSend", countSend);
+            mapObject.put("otp", OTP);
+            jsonObject.put("map", mapObject);
+          result = client.set(key, JSONUtil.serialize(jsonObject));
+        } catch (Exception e) {
+            logger.error(LogUtil.stackTrace(e));
+        }
+        return result;
+    }
+
+    public static UserEnt get(int id) {
         UserEnt result = null;
-        
+
         try {
             RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
             String key = String.format(USER_KEY, id);
             String data = ConvertUtil.toString(client.get(key));
-            if(data.length() == 0){
+            if (data.length() == 0) {
                 return null;
             }
-            
+
             result = JSONUtil.deserialize(data, UserEnt.class);
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
         }
-        
+
         return result;
     }
-    
-    public static boolean verifyOtp(String email, String otp) throws Exception {
-    boolean result = false;
-    try {
-        RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
-        String key = String.format(USER_OTP, email);
-        String data = ConvertUtil.toString(client.get(key));
-        OtpData item = JSONUtil.deserialize(data, OtpData.class);
-        
-        boolean isStatusValid = item.status && item.countSend >= 3;
-        boolean isExpirationValid = item.expiration > System.currentTimeMillis();
-        boolean isOtpValid = item.OTP.equals(otp);
-        
-        if (isStatusValid && isExpirationValid && isOtpValid) {
-            item.status = false;
-            result = client.set(key, JSONUtil.serialize(item));
-        }
-    } catch (Exception e) {
-        logger.error(LogUtil.stackTrace(e));
-    }
-    return result;
-}
 
-    
-  
+    public static boolean verifyOtp(String email, String otp) throws Exception {
+        boolean result = false;
+        try {
+            RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
+            String key = String.format(USER_OTP, email);
+            String data = client.get(key);
+
+            if (data == null) {
+                return result;
+            }
+            JSONObject jsonObject = new JSONObject(data);
+            JSONObject mapObject = jsonObject.getJSONObject("map");
+            String otpdata = mapObject.getString("otp");
+            int countSend = mapObject.getInt("countSend");
+
+            if (countSend >= 4) {
+                return result;
+            }
+
+            if (otpdata.length() < 0) {
+                return result;
+            }
+
+            if (!otpdata.equals(otp)) {
+                return result;
+            }
+
+            result = client.del(key) > 0;
+
+        } catch (Exception e) {
+            logger.error(LogUtil.stackTrace(e));
+        }
+        return result;
+    }
+
     public static boolean del(int id) {
         boolean result = false;
-        
+
         try {
             RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
             String key = String.format(USER_KEY, id);
@@ -163,11 +147,11 @@ public class UserCA {
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
         }
-        
+
         return result;
     }
-    
-    public static boolean setMap(String email, int id){
+
+    public static boolean setMap(String email, int id) {
         boolean result = false;
         try {
             RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
@@ -176,29 +160,29 @@ public class UserCA {
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
         }
-        
+
         return result;
     }
-    
-    public static int getMap(String email){
+
+    public static int getMap(String email) {
         int result = 0;
-        
+
         try {
             RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
             String key = String.format(USER_MAP, email);
-            result = ConvertUtil.toInt(client.get(key));           
-            
+            result = ConvertUtil.toInt(client.get(key));
+
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
             result = -1;
         }
-        
+
         return result;
     }
-    
+
     public static boolean delMap(String email) {
-        boolean result = false;  
-        
+        boolean result = false;
+
         try {
             RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
             String key = String.format(USER_MAP, email);
@@ -206,7 +190,7 @@ public class UserCA {
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
         }
-        
+
         return result;
     }
 }
