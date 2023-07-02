@@ -73,10 +73,10 @@ public class UserCA {
                 return result;
             }
             result = client.del(key) > 0;
-            mapObject.put("countSend", countSend);
+            mapObject.put("countSend", countSend++);
             mapObject.put("otp", OTP);
             jsonObject.put("map", mapObject);
-          result = client.set(key, JSONUtil.serialize(jsonObject));
+          result = client.set(key, JSONUtil.serialize(mapObject));
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
         }
