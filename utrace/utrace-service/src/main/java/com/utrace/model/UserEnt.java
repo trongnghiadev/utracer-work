@@ -14,7 +14,7 @@ public class UserEnt {
     public boolean status;
     public long createdAt;
     public long updatedAt;
-    public String passwordUser;
+    public String password;
     
     public UserEnt () {
         this.id = 0;
@@ -25,11 +25,7 @@ public class UserEnt {
         this.status = true;
         this.createdAt = 0;
         this.updatedAt = 0;
-        this.passwordUser = "";
-    }
-
-    public void setPasswordUser(String passwordUser) {
-        this.passwordUser = passwordUser;
+        this.password = "";
     }
 
     // User Entity

@@ -63,19 +63,28 @@ public class UserBC {
         }
         return result;
     }
-    
-    
-    
+
     public static boolean changeOTP(String email) {
         boolean result = false;
         try {
             UserEnt userEnt = getByEmail(email);
-            if(userEnt == null) {
+            if (userEnt == null) {
                 return result;
             }
             String randomOtp = RandomNumber.getRandomNumberString();
+
+            String msgContent = randomOtp + " là mã xác nhận tài khoản";
+            try {
+                SendMail.Send(email, "Mã xác nhận", msgContent);
+            } catch (MessagingException e) {
+                e.printStackTrace();
+                return result;
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+                return result;
+            }
             return UserCA.UpdateOTP(email, randomOtp);
-       
+
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
         } finally {
@@ -152,32 +161,6 @@ public class UserBC {
         return result;
     }
 
-    public static UserEnt getById(int id) {
-        long startTime = System.currentTimeMillis();
-
-        UserEnt result = null;
-
-        try {
-            if (id <= 0) {
-                return result;
-            }
-
-            result = UserCA.get(id);
-
-            if (result == null) {
-                result = UserDA.getById(id);
-            }
-
-            if (result != null) {
-                UserCA.set(result);
-            }
-        } catch (Exception e) {
-            logger.error(LogUtil.stackTrace(e));
-        } finally {
-        }
-        return result;
-    }
-
     public static UserEnt get(int id) {
         long startTime = System.currentTimeMillis();
 
@@ -231,7 +214,7 @@ public class UserBC {
                 return null;
             }
 
-            if (!user.passwordUser.equals(pass)) {
+            if (!user.password.equals(pass)) {
                 return null;
             }
 
@@ -251,7 +234,7 @@ public class UserBC {
             if (ConvertUtil.toString(email).length() <= 0) {
                 return result;
             }
-             
+
             // Check if user with email exists
             result = getByEmail(email);
 
@@ -326,18 +309,18 @@ public class UserBC {
 
         try {
             UserEnt user = getByEmail(email);
-            
+
             if (user == null) {
                 return result;
             }
-            if(user.passwordUser.length() > 0) {
+            if (user.password.length() > 0) {
                 return result;
             }
             if (!(user.status && user.emailVerified)) {
                 return result;
             }
 
-            user.passwordUser = pass;
+            user.password = pass;
             user.updatedAt = System.currentTimeMillis();
 
             if (!UserCA.set(user)) {
@@ -370,36 +353,37 @@ public class UserBC {
         }
     }
 
-    public static boolean changePassword(String email, String oldPassword, String newPassword) {
+    public static UserEnt changePassword(String email, String oldPassword, String newPassword) {
         // Kiểm tra tính hợp lệ của email, mật khẩu cũ và mật khẩu mới
         if (email == null || email.isEmpty() || oldPassword == null || oldPassword.isEmpty() || newPassword == null || newPassword.isEmpty()) {
-            return false;
+            return null;
         }
 
         // Kiểm tra xem người dùng có tồn tại và mật khẩu cũ chính xác hay không
         UserEnt userEntity = UserBC.login(email, MD5.md5(oldPassword));
         if (userEntity == null) {
-            return false;
+            return null;
         }
 
         try {
             UserEnt item = getByEmail(email);
             item.updatedAt = System.currentTimeMillis();
-            item.passwordUser = MD5.md5(newPassword);
+            item.password = MD5.md5(newPassword);
 
             if (!UserDA.update(item)) {
-                return false;
+                return null;
             }
 
             if (!UserCA.set(item)) {
-                return false;
+                return null;
             }
 
-            // Trả về true nếu cập nhật mật khẩu thành công
-            return true;
+            // Trả về đối tượng UserEnt sau khi cập nhật mật khẩu thành công
+            return item;
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
-            return false;
+            return null;
         }
     }
+
 }

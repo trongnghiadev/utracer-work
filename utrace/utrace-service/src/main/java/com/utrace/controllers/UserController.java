@@ -13,10 +13,7 @@ import spark.Request;
 import spark.Response;
 import com.utrace.utils.MD5;
 import com.utrace.utils.APIResponseUtil;
-import com.utrace.utils.SendMail;
 import com.utrace.utils.TokenHelper;
-import java.io.UnsupportedEncodingException;
-import javax.mail.MessagingException;
 
 /**
  *
@@ -71,18 +68,16 @@ public class UserController {
         }
     }
 
-
     public static String checkOtp(Request req, Response res) throws JsonProcessingException, Exception {
         String email = req.queryParams("email");
         String otp = req.queryParams("otp");
 
         if (UserBC.checkOtp(email, otp)) {
-            return APIResponseUtil.successResponse("OTP authentication successful",email);
+            return APIResponseUtil.successResponse("OTP authentication successful", email);
         } else {
             return APIResponseUtil.errorResponse("Invalid OTP");
         }
     }
-    
 
     public static String register(Request req, Response res) throws JsonProcessingException {
         String email = req.queryParams("email");
@@ -92,7 +87,7 @@ public class UserController {
             return APIResponseUtil.errorResponse("User registration failed");
         }
     }
-    
+
     public static String changeOTP(Request req, Response res) throws JsonProcessingException {
         String email = req.queryParams("email");
         if (UserBC.changeOTP(email)) {
@@ -116,8 +111,15 @@ public class UserController {
         String email = req.queryParams("email");
         String oldPassword = req.queryParams("oldPassword");
         String newPassword = req.queryParams("newPassword");
-        boolean passwordChanged = UserBC.changePassword(email, oldPassword, newPassword);
-        if (passwordChanged) {
+        UserEnt updatedUser = UserBC.changePassword(email, oldPassword, newPassword);
+        if (updatedUser != null) {
+            // Tạo token mới dựa trên thông tin người dùng đã cập nhật
+            String updatedUserInfo = JSONUtil.serialize(updatedUser);
+            String newToken = TokenHelper.CreateToken(updatedUserInfo);
+
+            // Cập nhật tiêu đề Authorization header trong phản hồi với token mới
+            res.header("Authorization", newToken);
+
             return APIResponseUtil.successResponse("Password changed successfully");
         } else {
             return APIResponseUtil.errorResponse("Invalid password or user not found");

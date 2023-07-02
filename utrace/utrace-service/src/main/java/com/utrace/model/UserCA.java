@@ -5,9 +5,6 @@ import com.urvega.framework.util.ConvertUtil;
 import com.urvega.framework.util.JSONUtil;
 import com.urvega.framework.util.LogUtil;
 import com.utrace.config.ConfigInfo;
-import com.utrace.utils.SendMail;
-import java.io.UnsupportedEncodingException;
-import javax.mail.MessagingException;
 import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 
@@ -39,6 +36,7 @@ public class UserCA {
     }
 
     public static boolean setOTP(String email, String OTP) {
+        long currentTime = System.currentTimeMillis() / 1000L; 
         boolean result = false;
         try {
             RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
@@ -47,7 +45,7 @@ public class UserCA {
             jsonObject.put("otp", OTP);
             jsonObject.put("countSend", 1);
             result = client.set(key, JSONUtil.serialize(jsonObject));
-            client.expireAt(key, System.currentTimeMillis() + 3600000);
+            client.expireAt(key, currentTime + 3600);
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
         }
@@ -55,6 +53,7 @@ public class UserCA {
     }
 
     public static boolean UpdateOTP(String email, String OTP) {
+        long currentTime = System.currentTimeMillis() / 1000L; 
         boolean result = false;
         try {
             RedisClient client = RedisClient.getInstance(ConfigInfo.CACHE_USER);
@@ -68,15 +67,15 @@ public class UserCA {
             JSONObject mapObject = jsonObject.getJSONObject("map");
             int countSend = mapObject.getInt("countSend");
 
-            if (countSend >= 4) {
+            if (countSend >= 3) {
                 // Điều kiện không thỏa mãn, không thể cập nhật
                 return result;
             }
-            result = client.del(key) > 0;
             mapObject.put("countSend", countSend++);
             mapObject.put("otp", OTP);
             jsonObject.put("map", mapObject);
           result = client.set(key, JSONUtil.serialize(mapObject));
+          client.expireAt(key, currentTime + 3600);
         } catch (Exception e) {
             logger.error(LogUtil.stackTrace(e));
         }

@@ -21,6 +21,10 @@ public class TokenHelper {
     }
     
     public static Boolean IsValidToken(String token) {
-        return rijndael.decrypt(token) != "";
+            if(token.length() <= 1) {
+                return false;
+            }
+                
+            return rijndael.decrypt(token) != "";
     }
 }

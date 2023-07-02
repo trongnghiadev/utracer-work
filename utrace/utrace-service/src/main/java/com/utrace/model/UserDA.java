@@ -111,7 +111,7 @@ public class UserDA {
                 stmt.setString(3, item.phone);
                 stmt.setBoolean(4, item.status);
                 stmt.setDate(5, new java.sql.Date(item.updatedAt));
-                stmt.setString(6, item.passwordUser);
+                stmt.setString(6, item.password);
                 stmt.setInt(7, item.id);
 
                 result = stmt.executeUpdate() > 0;
@@ -124,25 +124,5 @@ public class UserDA {
             }
         }
         return result;
-    }
-
-    public static UserEnt login(String email, String password) {
-        UserEnt userEntity = null;
-
-        try ( Connection con = DriverManager.getConnection(ConfigInfo.DB_URL, ConfigInfo.DB_USER, ConfigInfo.DB_PASSWORD);  PreparedStatement stmt = con.prepareStatement("SELECT * FROM user WHERE `email` = ? AND `password` = ? AND `email_verified` = 1 AND `status` = 1")) {
-
-            stmt.setString(1, email);
-            stmt.setString(2, password);
-
-            try ( ResultSet rs = stmt.executeQuery()) {
-                if (rs.next()) {
-                    userEntity = getFromResultSet(rs);
-                }
-            }
-        } catch (Exception e) {
-            logger.error(LogUtil.stackTrace(e));
-        }
-
-        return userEntity;
     }
 }

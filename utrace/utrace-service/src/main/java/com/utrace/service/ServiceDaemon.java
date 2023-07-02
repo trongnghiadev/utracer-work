@@ -3,6 +3,8 @@ package com.utrace.service;
 import com.utrace.controllers.UserController;
 import com.urvega.framework.util.LogUtil;
 import com.utrace.utils.TokenHelper;
+import java.util.Arrays;
+import java.util.List;
 import org.apache.logging.log4j.Logger;
 import static spark.Spark.*;
 
@@ -23,12 +25,21 @@ public class ServiceDaemon {
         // exec before every request
         before((request, response) -> {
             String path = request.pathInfo();
-
             // check path
-            if (!path.equals("/users/login") && !path.matches("^/users/[^/]+$") && !path.equals("/users/checkOtp")) {
+            List<String> excludedPaths = Arrays.asList(
+                    "/users/login",
+                    "/users/:email",
+                    "/users/checkOtp",
+                    "/users/setNewPass",
+                    "/users/register",
+                    "/users/forgotPass"
+            );
+
+            // Kiểm tra path có nằm trong excludedPaths không
+            if (!excludedPaths.contains(path)) {
                 // Get token from Authorization header
                 String token = request.headers("Authorization");
-
+                
                 // validate token
                 if (!TokenHelper.IsValidToken(token)) {
                     // token is not valid, return 401 Unauthorized
