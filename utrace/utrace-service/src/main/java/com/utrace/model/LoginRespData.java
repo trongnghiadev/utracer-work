@@ -4,6 +4,8 @@
  */
 package com.utrace.model;
 
+import com.utrace.model.Ent.UserEnt;
+
 /**
  * Return to client while login success include 
  * token and userInfo

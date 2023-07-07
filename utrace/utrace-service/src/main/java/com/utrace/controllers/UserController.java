@@ -3,17 +3,16 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.utrace.controllers;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.urvega.framework.util.JSONUtil;
 import com.utrace.model.LoginRespData;
-import com.utrace.model.UserBC;
-import com.utrace.model.UserEnt;
+import com.utrace.model.BC.UserBC;
+import com.utrace.model.Ent.UserEnt;
 import spark.Request;
 import spark.Response;
-import com.utrace.utils.MD5;
-import com.utrace.utils.APIResponseUtil;
-import com.utrace.utils.TokenHelper;
+import com.utrace.util.MD5;
+import com.utrace.util.APIResponseUtil;
+import com.utrace.util.TokenHelper;
 
 /**
  *
